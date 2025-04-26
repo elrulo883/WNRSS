@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Love Questions Game</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Nunito', sans-serif;
+            background-color: #d00000;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .banner {
+            background-color: white;
+            color: #d00000;
+            padding: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .banner-text {
+            font-style: italic;
+        }
+
+        .banner-by {
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+
+        .screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        input[type="text"] {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            font-family: 'Nunito', sans-serif;
+            width: 250px;
+        }
+
+        button {
+            margin: 8px;
+            padding: 12px 24px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            background-color: white;
+            color: #d00000;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: 'Nunito', sans-serif;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            background-color: #f44336;
+            color: white;
+        }
+
+        .card-container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 360px; /* ¡He aumentado el ancho! Antes era 320px */
+    height: 250px; /* ¡He aumentado la altura! Antes era 220px */
+    position: relative;
+    margin-bottom: 25px;
+    cursor: grab;
+    overflow: hidden;
+    user-select: none;
+}
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #scratch-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            cursor: crosshair;
+            z-index: 1;
+        }
+
+        #question {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    z-index: 2;
+    padding: 20px;
+    text-align: center;
+    word-wrap: break-word;
+    pointer-events: none;
+    font-size: 1.1em; /* ¡He reducido un poco el tamaño de la fuente! Antes era 1.3em */
+    color: #d00000;
+    font-family: 'Nunito', sans-serif;
+}
+
+        #turn-indicator {
+            color: white;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .category-selection {
+            background-color: white;
+            color: #333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        .category-selection h2 {
+            color: #d00000;
+            margin-top: 0;
+        }
+
+        .category-selection div {
+            margin-top: 10px;
+        }
+
+        .category-selection label {
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <div class="banner-text">we’re not really strangers</div>
+        <div class="banner-by">by Raul para Atenea</div>
+    </div>
+    <div id="start-screen" class="screen">
+        <h1>¿Listos para explorar?</h1>
+        <input type="text" id="player1" placeholder="Nombre del Jugador 1" />
+        <input type="text" id="player2" placeholder="Nombre del Jugador 2" />
+        <div class="category-selection">
+            <h2>Selecciona los niveles/packs de preguntas:</h2>
+            <div>
+                <input type="checkbox" id="nivel1" name="categoria" value="Nivel 1 – Percepción">
+                <label for="nivel1">Nivel 1 – Percepción</label><br>
+                <input type="checkbox" id="nivel2" name="categoria" value="Nivel 2 – Conexión">
+                <label for="nivel2">Nivel 2 – Conexión</label><br>
+                <input type="checkbox" id="nivel3" name="categoria" value="Nivel 3 – Reflexión">
+                <label for="nivel3">Nivel 3 – Reflexión</label><br>
+                <input type="checkbox" id="dating" name="categoria" value="Dating Expansion Pack">
+                <label for="dating">Dating Expansion Pack</label><br>
+                <input type="checkbox" id="sex" name="categoria" value="Sex & Intimacy Deck">
+                <label for="sex">Sex & Intimacy Deck</label><br>
+                <input type="checkbox" id="healing" name="categoria" value="Healing Edition">
+                <label for="healing">Healing Edition</label><br>
+                <input type="checkbox" id="selflove" name="categoria" value="Self-Love Edition">
+                <label for="selflove">Self-Love Edition</label><br>
+                <input type="checkbox" id="relationship" name="categoria" value="Relationship Expansion Pack">
+                <label for="relationship">Relationship Expansion Pack</label><br>
+                <input type="checkbox" id="xxx" name="categoria" value="XXX Expansion Pack">
+                <label for="xxx">XXX Expansion Pack</label><br>
+                <input type="checkbox" id="couples" name="categoria" value="Couples Edition">
+                <label for="couples">Couples Edition</label><br>
+            </div>
+        </div>
+        <button onclick="startGame()">¡Comenzar la exploración!</button>
+    </div>
+
+    <div id="game-screen" class="screen hidden">
+        <p id="turn-indicator">Es el turno de: </p>
+        <div class="card-container" id="card-container">
+            <canvas id="scratch-canvas" width="320" height="220"></canvas>
+            <p id="question"></p>
+        </div>
+        <div class="controls">
+            <button onclick="changeQuestion()">Cambiar pregunta</button> <button onclick="nextTurn()">Siguiente jugador</button>
+            <button onclick="restartGame()">Volver a empezar</button>
+            <button onclick="finalizeGame()">Terminar el desafío</button>
+        </div>
+    </div>
+
+    <script>
+        let players = [];
+        let currentPlayerIndex = 0;
+        let allQuestions = {
+
+    "Nivel 1 – Percepción": [
+"What do you think is the hardest part of what I do for a living?",
+"What reality show do you think I'm most likely to binge watch? Explain.",
+"What's the first thing you noticed about me?",
+"If Myspace was still a thing what would my profile song be?",
+"If you were to buy me a present, knowing nothing about me other than what I look like, what would it be?",
+"On a scale of 1-10, how messy do you think my car is? 1 being the cleanest 10 complete disaster, explain.",
+"Do you think plants thrive or die in my care? Explain.",
+"Do I look kind? Explain.",
+"Do I seem like more of a creative or analytical type? Explain.",
+"Do I seem like someone who would get a name tattooed on myself? Why or why not?",
+"Finish the sentence: Just by looking at you I'd think _____________.",
+"What do my shoes tell you about me?",
+"Do you think I've ever been fired from a job? If so, what for?",
+"What was your first impression of me?",
+"What was your first impression of me on Bumble vs IRL?",
+"How would you describe what you think my type is in three words?",
+"What did you think about my first message?",
+"Between the two of us, who seems like the better texter? Explain.",
+"What does my Instagram tell you about me?",
+"Make an assumption about me.",
+"What about me intrigues you?",
+"What do you think I'm most likely to splurge on?",
+"As a child, what do you think I wanted to be?",
+"Finish the sentence: Just by looking at you I'd think _____________.",
+"Do you think I was popular in school? Explain.",
+"How many speeding tickets do you think I've gotten in my life?",
+"Do I seem like someone who would get a name tattooed on myself? Why or why not?",
+"Do you think I fall in love easily? Why or why not?",
+"What compliment do you think I hear the most?",
+"Do you think I ever checked an ex’s phone for evidence?",
+"What subject do you think I thrived at in school and did I fail any?",
+"Do I seem like a coffee or tea person - sweetened or unsweetened?",
+"As a child what do you think I wanted to be when I grow up?",
+"Do I seem like a morning person or a night owl?",
+"Do you think I was popular at school? Explain.",
+"Do you think I'm usually early, on time, or late to events? Explain.",
+"Do I remind you of anyone you know?",
+"What do you think I'm most likely to splurge on?",
+"How many speeding tickets do you think I've gotten in my life?",
+"WILDCARD: Ask and answer the next question in a different accent.",
+"WILDCARD: Create your own question.",
+"Am I someone you typically connect with?",
+"Do I intimidate you? Why or why not?",
+"What's your favorite song lyric that comes to your mind from the top of your head?",
+"As a child, what do you think I wanted to be?",
+"WILDCARD: Write down your number one goal for the next month. Compare."
+
+
+        // ... más preguntas de Nivel 1
+    ],
+    "Nivel 2 – Conexión": [
+"What's been your happiest memory this past year?",
+"Have you changed your mind about anything recently?",
+"What has been your earliest recollection of happiness?",
+"What lesson took you the longest to un-learn?",
+"Are you lying to yourself about anything?",
+"What questions are you trying to answer most in your life right now?",
+"When was the last time you surprised yourself?",
+"What title would you give this chapter in your life?",
+"What do you crave more of?",
+"Finish the sentence: Strangers would describe me as ______ only I know that I am _______",
+"What's the worst pain you have ever been in that wasn't physical?",
+"Has a stranger ever changed your life?",
+"What's your first love's name and the reason you fell in love with them?",
+"What would your younger self not believe about your life today?",
+"How would you describe the feeling of being in love with one word?",
+"What are you more afraid of: failure or success and why?",
+"What is a dream you let go of?",
+"If you could get to know someone in your life on a deeper level who would it be and why?",
+"What's your mom's name and what is the most beautiful thing about her?",
+"What part of your life works? What part of your life hurts?",
+"How can you become a better person?",
+"Do you think the image you have of yourself matches the image other people see you as?",
+"Are you missing anyone right now? Do you think they miss you too?",
+"What fast food restaurant do you think I'm most likely to drive through? What's my order?",
+"Do you think I intimidate others? Why or why not?",
+"When you are asked how are you, how often do you answer truthfully?",
+"How are you, really?",
+"What's the most unexplainable thing that happened to you?",
+"What's your father's name? And tell me one thing about him.",
+"If you could have it your way: who would you be with? Where would you be? What would you be doing?",
+"Describe your perfect day!",
+"What dating advice would you give your younger self?",
+"How old do you feel emotionally?",
+"Will I find your Ex on your Insta feed? Why or why not?",
+"What's the most embarrassing thing that happened to you on a date?",
+"What could you have done better in previous relationships?",
+"Is there an image of yourself you try to project on a first date you wish you could let go of?",
+"Finish the sentence: Dating is ____________",
+"What did the people who raised you teach you about love?",
+"Describe your perfect date.",
+"What has being single taught you about yourself?",
+"What's your least favorite question to be asked on a date? What do you wish you would be asked more?",
+"What are you passionate about?",
+"What are you not currently giving enough time to?",
+"What about my profile made you swipe right?",
+"WILDCARD: Write down the three most important things to you in a relationship (30 sec). Compare.",
+"WILDCARD: Write down a dating pet peeve (30 sec). Compare.",
+"WILDCARD: Draw your current mood. Compare."
+
+
+        // ... más preguntas de Nivel 2
+    ],
+    "Nivel 3 – Reflexión": [
+"Based on what you learned about me what would you recommend I read?",
+"What about me surprised you?",
+"Based on what you know about me, do you have a Netflix recommendation?",
+"What do you think my superpower is?",
+"What do you think our most important similarities are?",
+"What do you think is one thing I could do that would drastically improve my life?",
+"What would be the perfect gift for me?",
+"How would you describe me to a stranger?",
+"What do I need to hear right now?",
+"Based on what you've learned about me, does my social media portray me accurately?",
+"What is a lesson you will take away from our conversation?",
+"What can I help you with?",
+"What do you think do I fear the most?",
+"Where am I most qualified to give advice about?",
+"What about me is the hardest for you to understand?",
+"If we were a band what would be our name?",
+"Admit something.",
+"What parts of yourself do you see in me?",
+"How does one earn your vulnerability?",
+"Dare your partner to do something out of their comfort zone next week.",
+"What do you recommend I should let go of?",
+"What has this conversation taught you about yourself?",
+"What do you think my defining characteristic is?",
+"What question were you most afraid to answer?",
+"Why do you think we met?",
+"When this game is over, what will be something you will remember about me?",
+"What do you think my weakness is?",
+"How do our personalities complement each other?",
+"What do you think I should know about myself that perhaps I'm unaware of?",
+"What would make you feel closer to me?",
+"What do you admire most about me?",
+"In one word, describe how you feel right now.",
+"Do you believe everyone has a calling? If so, do you think I've found mine?",
+"What do you think my defining characteristic is?",
+"What can we create together?",
+"What answer of mine made you light up?",
+"What's the most attractive quality about me that isn't physical?",
+"WILDCARD: Based on what you learned re-write each other's dating app bios. (30 sec)",
+"Am I like you expected me to be?",
+"What do you admire most about me?",
+"How would you describe me to a stranger?",
+"WILDCARD: Draw your favorite memory with me. Compare."
+        // ... más preguntas de Nivel 3
+    ],
+    "Dating Expansion Pack": [
+"What's your happiest childhood memory?",
+"If you could live anywhere in the world, where would it be and why?",
+"What do you value most in a friendship?",
+"What is your biggest fear in a relationship and how do you think you could overcome it?",
+"What makes you feel most loved or appreciated?",
+"What part of yourself do you find most difficult to accept?",
+"What is a quality you greatly admire in others but sometimes struggle to find in yourself?",
+"How would you like people to remember you?",
+"What's the first thing that attracts you to a person when you meet them?",
+"How would you like someone to take care of you when you feel vulnerable?",
+"What kind of things usually make you laugh the most?",
+"What do you think makes a relationship successful?",
+"If your life were a movie, what kind of movie would it be and who would play you?",
+"What have you learned from past relationships that has helped you grow?",
+"If you could change anything in your life, what would you change and why?",
+
+"What does being vulnerable mean to you?",
+"What makes you feel most connected to someone?",
+"What is your greatest emotional need in a relationship?",
+"When was the last time you felt you really connected with someone and why?",
+"Is there anything you've done for love that surprised yourself?",
+"What do you think blocks you the most from being completely open with someone?",
+"If you felt totally safe, what would you tell your loved one right now?",
+"What does 'being committed' to someone mean to you?",
+"What quality do you value most in a partner?",
+"What part of your life do you feel you haven't yet shared with your partner or someone close?",
+"How do you handle discomfort or disagreements in a relationship?",
+"Is there anything you wish you could express but don't feel able to?",
+"What kind of emotional support would you like to receive more often?",
+"What do you fear most when you fall in love with someone?",
+"How would you like someone to help you overcome your fears or insecurities?",
+"How important is honesty to you in a relationship?",
+
+"What would you do to show someone how much you care without needing to say it?",
+"What's the biggest thing you've learned about yourself in a relationship?",
+"Is there any quality you would like to develop in a relationship to improve it?",
+"If you could share anything with the person you love without fear of judgment, what would it be?",
+"What is the hardest part of being yourself in a relationship?",
+"What do you think you would like to change about the way you love someone?",
+"What are the most important commitments you consider essential in a relationship?",
+"How do you prefer to be shown love: with words, actions, or shared time?",
+"What does 'personal space' mean to you in a relationship?",
+"What do you value most about the way your partner has treated you so far?",
+"If you felt completely supported, what emotional risks would you be willing to take?",
+"How would you handle unrequited love or unmet expectations?",
+"What do you want people to understand about you when you are going through difficult times?",
+"What would you do if you were completely free from fear in love?",
+"How do you balance personal independence and emotional connection in a relationship?",
+"What important lessons have you learned about love over the years?",
+"What aspect of your love life would you like to transform?",
+"How would you like to be supported when you don't have all the answers?",
+"List 5 things you appreciate about the person you are playing with and share them.",
+"Write a sincere message or letter to your future self, expressing your thoughts on love and relationships.",
+"Write a positive affirmation about yourself that you can read every day.",
+"Draw something that represents what an ideal loving relationship is for you.",
+"Take a minute to thank your partner for something they have recently done to make you feel supported.",
+        // ... más preguntas del Dating Expansion Pack
+
+    ],
+    "Sex & Intimacy Deck": [
+"What's the most sensual thing you've done for yourself?",
+"What part of your body do you like to be touched the most, and why?",
+"How does vulnerability make you feel during an intimate moment?",
+"What's your biggest fantasy that you've never shared with anyone?",
+"What part of your body would you like to have discovered like a secret?",
+"What kind of touches or caresses make you feel most cherished?",
+"What attracts you most to intimacy emotionally, beyond the physical?",
+"How do you define a satisfying intimate experience for yourself?",
+"What excites you most mentally during a moment of intimacy?",
+"Do you have any desires or fantasies that you feel uncomfortable sharing? Why?",
+"What type of touch excites you the most regardless of the situation?",
+"Do you like to receive or give control during intimacy, or do you prefer something more balanced?",
+"What does consent mean to you in an intimate relationship?",
+"What makes you feel truly desired by your partner?",
+"Is there any recurring fantasy that you're embarrassed to admit?",
+"How do you prefer your partner to touch you when you are both in an intimate moment?",
+"What do you think of open communication about desires during intimacy?",
+"Is there anything about your body that others often overlook but you would like them to notice more?",
+"What attracts you most to someone when you are in an intimate context?",
+"How do you know when you feel truly connected to someone during intimacy?",
+
+"How do you like your partner to make you feel during intimate moments?",
+"What is the most intimate gesture or word that makes you feel truly connected to your partner?",
+"What type of intimacy do you prefer: spontaneous or planned?",
+"How does it make you feel when your partner expresses their desires or fantasies?",
+"What would you like your partner to better understand about you during moments of intimacy?",
+"Is there any part of your body that you would like your partner to explore more?",
+"What have you discovered about yourself through intimacy in your relationship?",
+"What is your most intense memory of a shared intimate moment?",
+"How do you feel when your partner is vulnerable or expressive during an intimate moment?",
+"Is there anything you would like to experience with your partner but haven't dared to share yet?",
+"Would you like to receive more or give more in terms of desire and intimacy?",
+"What does emotional connection mean to you during an intimate act?",
+"What attracts you most to your partner when you are sharing an intimate experience?",
+"How do you know when you have reached a sufficient level of trust to explore new experiences together?",
+"How can you communicate to your partner when you feel uncomfortable during an intimate moment?",
+"What is the most important thing you would like your partner to understand about your boundaries in intimacy?",
+"What is the difference between feeling desired and feeling loved during an intimate moment?",
+"What role would you like to assume more often in intimacy, if you could choose freely?",
+"How would you like your partner to react to your deepest desires or fantasies?",
+"What does it mean to you that your partner cares about your emotional comfort during an intimate moment?",
+
+"What's the most daring or spontaneous thing you've done during an intimate moment?",
+"What's the most intense fantasy you've had but never explored?",
+"How does it make you feel when someone looks at you in a way that excites you without touching you?",
+"What's the sexiest or most seductive gesture you can make without saying anything?",
+"What's the most sensual thing you would like your partner to do for you?",
+"How do you prefer to be touched when you want to be aroused without a word being said?",
+"What part of your body would you like to be caressed slowly without rushing?",
+"How does it make you feel when your partner takes the time to focus completely on your pleasure?",
+"What excites you most when your partner shares their desires with you?",
+"Do you like your partner to guide you or do you prefer to be the one in control during intimacy?",
+"How do you know when you are reaching the level of emotional connection you seek during an intimate moment?",
+"What is the most exciting thing for you in a shared intimate situation?",
+"How would you like your partner to surprise you during an intimate moment?",
+"What words or phrases do you find most arousing when you are in an intimate moment?",
+"What's the most spontaneous or playful thing you would like to try in intimacy without overthinking?",
+"How do you feel when you are completely in the present, without distractions, during intimacy?",
+"How would you like your body to feel after a moment of deep intimacy with your partner?",
+"What's the most exciting thing you can do for your partner that isn't necessarily physical?",
+"Would you like to explore new dynamics of control or surrender during intimacy?",
+"What is the most powerful moment you have experienced during an intimate encounter that wasn't necessarily related to sex?",
+"Tell your partner what part of their body excites you the most, and explain it in detail.",
+"Ask your partner a question you've never dared to ask about their intimate desires.",
+"Recall a moment when you felt a deep connection during intimacy and share it.",
+"Tell your partner a fantasy you would like to explore in the future.",
+"Take 5 minutes to explore your partner's tastes or desires with your hands, without saying anything.",
+"Express to your partner what attracts you most emotionally, beyond the physical.",
+"Bring a sexy surprise to your partner in an intimate moment.",
+        // ... más preguntas del Sex & Intimacy Deck
+    ],
+    "Healing Edition": [
+"What part of yourself have you recently learned to accept?",
+"What do you value most about yourself at this point in your life?",
+"What situation from your past do you think has marked you the most and why?",
+"In what areas of your life would you like to experience more peace or emotional relief?",
+"What has been the most difficult moment you have overcome and how did you achieve it?",
+"What do you fear most when you think about your future?",
+"What makes you feel most vulnerable and how do you deal with it?",
+"How do you take care of yourself when you feel emotionally exhausted?",
+"What would you say to your younger self if you could give them advice?",
+"What do you think has prevented you from fully healing from a past experience?",
+"What emotion is the hardest for you to express and why?",
+"When was the last time you did something for your emotional well-being and how did it make you feel?",
+"At what point in your life have you felt most at peace with yourself?",
+"Is there anything you need to forgive yourself for?",
+"What does the concept of 'emotional healing' mean to you?",
+"What habits in your daily life help you keep your mental health in balance?",
+"How would you like people to support you when you are going through a difficult time?",
+"What do you think is most important for your emotional well-being?",
+"What does 'self-acceptance' mean to you?",
+"How would you like others to see you when you are going through a healing process?",
+
+"When was the last time you felt someone completely understood you?",
+"What does having an emotionally healthy relationship mean to you?",
+"Is there anything that prevents you from being completely vulnerable with others?",
+"How do you know when someone is being authentic with you?",
+"What kind of emotional support do you need when you are going through difficult times?",
+"What would you say to someone who is struggling with the same emotion as you right now?",
+"How do you respond when someone confides in you in a deep way?",
+"What do you value most in a close relationship, whether with friends or a partner?",
+"How does it make you feel when someone expresses their deepest feelings towards you?",
+"What is the most significant moment you have shared with someone you love?",
+"What aspect of relationships do you find most challenging?",
+"How can you be a better support for someone who is going through a difficult emotional process?",
+"What kind of gestures make you feel truly loved or supported?",
+"How do you balance giving and receiving emotional support in your relationships?",
+"What are the signs you look for in someone to know they really care about you?",
+"What would you like people to better understand about you in emotional terms?",
+"What small things make you feel like they know you well?",
+"What is the hardest thing for you to share with others about your emotional state?",
+"How can you strengthen your ability to be vulnerable and trusting in a relationship?",
+"What do you think is needed to create an emotionally safe environment among people?",
+
+"How would you like others to contribute to your emotional healing process?",
+"What do you think you should change or improve to better take care of your mental well-being?",
+"How would you like others to support you when you are struggling with your emotional health?",
+"What would you say to someone who is beginning their healing journey after a difficult experience?",
+"How can you help others become more aware of their emotions without judging them?",
+"What would you most like to heal within yourself and why?",
+"What lessons do you think can be learned from the difficult moments you have gone through?",
+"How could you be a better friend, partner, or companion when someone is going through emotional difficulties?",
+"What does 'healing alongside someone' mean to you?",
+"What do you most wish others understood about your healing process?",
+"What kind of actions or words help you heal when you feel broken inside?",
+"How can you be more compassionate with yourself when you are not okay?",
+"What healing message would you like to share with others right now?",
+"What aspects of your life would you like to heal to be more at peace with yourself?",
+"How can you show someone you care when they are going through a difficult process?",
+"What is the most important step you can take to heal emotionally?",
+"How would you like people to support you in moments when you don't have the right words?",
+"What aspect of your mental or emotional health do you want to improve, but don't know where to start?",
+"What would you most like to say to someone who is beginning to heal after trauma?",
+"What advice would you give yourself in your healing process?",
+"Write a letter to your future self, telling them what you hope to have healed by then.",
+"List 5 things you love about yourself and share them out loud.",
+"Take 5 minutes to meditate or breathe deeply and reflect on what you have shared so far.",
+"Do something that makes you feel at peace (it can be a simple gesture like a hug or a walk).",
+"Share something you would like to forgive yourself for.",
+"Take a minute to express gratitude for something you have overcome.",
+"Ask someone to give you a supportive hug for 30 seconds without words.",
+"Tell a story of a time when you helped someone heal emotionally.",
+"Share with us what you would most like to achieve in your healing process.",
+        // ... más preguntas de la Healing Edition
+    ],
+    "Self-Love Edition": [
+"What do you like most about yourself physically?",
+"How do you usually show yourself love in your daily life?",
+"What habit or practice makes you feel most at peace with yourself?",
+"How do you talk to yourself when you face a challenge or difficulty?",
+"What activity or action makes you feel most proud of yourself?",
+"What would you do for yourself if you weren't afraid of what others would say?",
+"What is your greatest personal achievement so far and why is it important to you?",
+"When was the last time you gave yourself a real break?",
+"Is there anything you used to do when you were younger that made you feel good about yourself?",
+"What do you value most about your personality?",
+"What part of yourself do you find most difficult to accept?",
+"How would you like others to see you through your own actions?",
+"What do you think prevents you from loving yourself more?",
+"Is there any negative belief you have about yourself that you would like to change?",
+"What part of your life do you feel needs more attention to foster self-love?",
+"What words of affirmation would you like to hear more from yourself?",
+"How do you show yourself that you value yourself in moments of insecurity?",
+"What qualities or skills would you like to develop more in yourself?",
+"How would you like to take care of yourself more emotionally?",
+"What act of self-love can you start practicing consistently to improve your well-being?",
+"What part of your body would you like to take better care of and why?",
+"What self-care activities help you feel more connected to yourself?",
+"Is there anything you have stopped doing for yourself that you wish you could resume?",
+"How do you usually respond when you feel emotionally drained?",
+"What is most comforting to you when you need a break?",
+"What kind of person would you like to be if you could let go of all your insecurities?",
+"How do you ensure that your emotional and physical needs are met?",
+"What aspect of your life do you feel reflects self-love most genuinely?",
+"How do you talk to yourself when you make a mistake or fail at something?",
+"What do you think helps you cultivate more patience with yourself?",
+"How would you like your loved ones to support you emotionally when you feel vulnerable?",
+"What practices have helped you improve your relationship with yourself?",
+"What is your favorite way to indulge yourself when you need some time for yourself?",
+"How can you be kinder to yourself in times of stress or difficulty?",
+"How do you face your fears or insecurities in a loving way?",
+"What kind of music or activity makes you feel more connected to your well-being?",
+"What would you like to learn or explore more about yourself that helps improve your self-esteem?",
+"How do you remind yourself of your own worth when you compare yourself to others?",
+"What positive thoughts can you tell yourself each morning to improve your attitude towards yourself?",
+"In what ways do you take care of yourself physically and emotionally in times of change or uncertainty?",
+"What has been the biggest challenge you have overcome in terms of self-esteem?",
+"What qualities of your character do you admire most in yourself?",
+"What would you tell your younger self to make them feel more confident?",
+"What is the best advice you would give yourself when you feel out of place?",
+"What do you like most about your way of facing life, even in difficult times?",
+"How do you celebrate the small achievements in your life that reflect your personal growth?",
+"How would you like people to remember you for the actions you take for yourself?",
+"What do you think is most important to cultivate a lasting self-love mindset?",
+"What do you think the world needs so that more people love and accept themselves as they are?",
+"How can you foster more gratitude towards yourself for the things you have achieved?",
+"What recent moment made you feel most satisfied with the person you are now?",
+"What phrase or mantra can help you feel more secure in your worth?",
+"What part of yourself do you think has improved the most in recent years?",
+"How can you celebrate and value your daily efforts to take care of yourself more?",
+"What personal fear or limitation have you overcome that has allowed you to grow more?",
+"How can you be more patient with yourself when things don't go as planned?",
+"How can you be kinder and less critical of yourself in complicated situations?",
+"What quality of yourself would you like others to see more often?",
+"How do you continue to work on your self-esteem to continue evolving as a person?",
+"What act of self-love would you like to start practicing to feel more satisfied with yourself?",
+"Write a thank-you letter to yourself for everything you have overcome so far.",
+"Do something you usually postpone for yourself, just to enjoy it.",
+"Take 5 minutes a day to look in the mirror and say three things you like about yourself.",
+"Draw something that represents your self-love or your deepest desires for yourself.",
+"Make a list of 5 qualities that make you unique and share it with someone you trust.",
+"Do something small to pamper yourself that you usually consider a luxury, like a long bath or a meal you enjoy.",
+"Write a positive affirmation that helps you remember how amazing you are, and read it aloud every day.",
+        // ... más preguntas de la Self-Love Edition
+    ],
+    "Relationship Expansion Pack": [
+"WHAT WAS THE FIRST THING YOU NOTICED ABOUT ME?",
+"WHAT ASSUMPTION DID YOU MAKE ABOUT ME THAT TURNED OUT TO BE FALSE?",
+"ON A SCALE OF 1-10, HOW OPEN DO YOU FEEL I AM WITH YOU? EXPLAIN.",
+"HOW IMPORTANT DO YOU THINK BIRTHDAYS AND HOLIDAYS ARE TO ME? EXPLAIN.",
+"WHO DO YOU THINK WAS MORE NERVOUS ON OUR FIRST DATE? EXPLAIN.",
+"WHAT DO YOU THINK MY PERFECT DATE NIGHT WOULD BE?",
+"WHAT WOULD A DAY OF COMPLETELY SPOILING ME LOOK LIKE?",
+"THE HARDEST THING FOR ME TO REVEAL ABOUT MYSELF TO YOU WAS ______.",
+"HOW DOES ONE EARN YOUR TRUST? HAVE I EARNED IT? HOW CAN I EARN MORE?",
+"WHAT HAS THIS RELATIONSHIP TAUGHT YOU ABOUT YOURSELF?",
+"WHAT'S THE MOST ROMANTIC THING I'VE DONE FOR YOU RECENTLY?",
+"WHAT'S ONE SMALL WAY I CAN BE A BETTER PARTNER?",
+"WHAT'S THE MOST ATTRACTIVE THING I DO WITHOUT REALIZING IT?",
+"WHAT DID OUR WORST ARGUMENT TEACH YOU?",
+"WHAT ARE YOU CURRENTLY WORKING THROUGH THAT I DON'T SEE, IF ANYTHING?",
+"WHAT SONG BEST DESCRIBES OUR RELATIONSHIP?",
+"DO YOU THINK MY JOB AFFECTS ME POSITIVELY OR NEGATIVELY? HOW DOES IT AFFECT US?",
+"WHAT HAVE YOU BEEN EXTRA SENSITIVE TO LATELY?",
+"WHAT'S THE BEST GIFT I'VE GIVEN YOU? MATERIAL AND IMMATERIAL?",
+"WHAT FEELINGS ARE HARD FOR YOU TO COMMUNICATE TO ME? HOW CAN I MAKE IT EASIER?",
+"WHAT ABOUT YOU FEELS HARDEST TO LOVE?",
+"WHAT IMMEDIATELY ATTRACTED YOU TO ME? WHAT ATTRACTED YOU MORE OVER TIME?",
+"WHAT DO YOU WISH WE DID MORE OF?",
+"ON A SCALE OF 1-10 WRITE DOWN THE IMPORTANCE OF HAVING KIDS TO YOU. COMPARE AND EXPLAIN.",
+"WHAT MADE YOU FALL IN LOVE WITH ME?",
+"WRITE DOWN THE TOP 3 THINGS YOUR PARTNER DOES THAT MAKES YOU FEEL MOST LOVED. BOTH PLAYERS. COMPARE.",
+"WHAT'S THE MOST IMPORTANT LESSON A PAST RELATIONSHIP HAS TAUGHT YOU?",
+"FINISH THE SENTENCE: THANK YOU FOR ACCEPTING ______.",
+"WILDCARD: WRITE A SHORT GUIDE OF HOW TO LOVE YOUR PARTNER WELL. 30 SECONDS. COMPARE.",
+"ARE THERE ANY INSECURITIES FROM PREVIOUS RELATIONSHIPS THAT YOU CARRIED INTO THIS ONE? IF SO, WHAT ARE THEY?",
+"HOW DO OUR STRENGTHS AND WEAKNESSES COMPLEMENT EACH OTHER?",
+"WILDCARD: WRITE A LOVE SONG FOR YOUR PARTNER. 1 MINUTE. PERFORM FOR EACH OTHER.",
+"WHAT HAVE I HELPED YOU APPRECIATE ABOUT YOURSELF?",
+"WHAT RECENT EXPERIENCE MADE YOU FEEL CLOSER TO ME?",
+"WILDCARD: DRAW ONE OF YOUR FAVORITE MEMORIES FROM OUR RELATIONSHIP. 30 SECONDS. COMPARE.",
+"WILDCARD: WRITE DOWN THE TITLE YOU WOULD GIVE THIS CHAPTER OF OUR RELATIONSHIP. COMPARE.",
+"HOW DO I SHOW THAT I LOVE YOU WITHOUT TELLING YOU?",
+"WHEN WAS THE LAST TIME I HURT YOU, PERHAPS UNINTENTIONALLY?",
+"WHAT FEAR DO YOU THINK HOLDS ME BACK THE MOST?",
+"HOW HAVE YOU SEEN ME GROW IN THIS RELATIONSHIP?",
+"WHAT'S ONE SMALL WAY WE CAN IMPROVE OUR SEX LIFE?",
+"HAVE I HELPED YOU CHANGE YOUR MIND ABOUT ANYTHING?",
+"WILDCARD: ASK YOUR PARTNER SOMETHING YOU'VE NEVER ASKED THEM BEFORE.",
+"HOW DOES OUR AGE DIFFERENCE, OR LACK THEREOF, AFFECT US? IF AT ALL?",
+"WHAT ANSWER OF MINE SURPRISED YOU THE MOST THROUGHOUT THIS GAME, IF ANY?",
+"WHAT DON'T I GIVE MYSELF ENOUGH CREDIT FOR?",
+"IS THERE ANYTHING YOU STILL DON'T KNOW ABOUT ME THAT YOU WISH YOU DID?",
+"WHAT ABOUT OUR RELATIONSHIP ARE YOU PROUDEST OF?",
+"WILDCARD: WRITE DOWN THE TOP 3 THINGS YOU'RE MOST GRATEFUL FOR IN YOUR PARTNER. 30 SECONDS. COMPARE.",
+"WHAT DID THIS CONVERSATION TEACH YOU ABOUT OUR RELATIONSHIP? WHAT DID IT TEACH YOU ABOUT YOURSELF?",
+"WHAT GOAL WOULD FEEL BEST FOR YOU TO ACCOMPLISH THIS YEAR? HOW CAN I SUPPORT YOU IN THAT?",
+"THANK YOU FOR HELPING ME REALIZE ____________________ ABOUT MYSELF."
+        // ... más preguntas del Relationship Expansion Pack
+    ],
+    "XXX Expansion Pack": [
+"What's the boldest thing you've wished someone would whisper while touching you?",
+"How often do you fantasize about someone in particular? What happens in those thoughts?",
+"Have you ever felt exposed by the pleasure someone gave you? How did it feel?",
+"What part of your body do you want to be discovered like a secret?",
+"Do visuals, sounds, or imagination arouse you more?",
+"What's something you've always wanted to explore intimately but never shared?",
+"What part of your body do you find most sensual, and why?",
+"What makes you feel truly desired?",
+"What's a recurring fantasy you're slightly embarrassed to admit?",
+"What seemingly small detail in someone really turns you on?",
+"Do you prefer taking control or surrendering during intimacy? Why?",
+"Have you ever felt a connection so intense that the desire became emotional?",
+"How would you define a satisfying sexual experience beyond the physical?",
+"What does your body language say when someone attracts you?",
+"What's your most intense memory related to intimacy?",
+"Is there something you've always wanted to try but never said out loud?",
+"How do you feel when someone looks at you with desire but says nothing?",
+"What type of touch makes you feel most vulnerable?",
+"Have you ever had an experience that felt more emotional than physical? What made it so?",
+"What's the boldest thought you've had during intimacy but kept to yourself?",
+"What's the most intense fantasy you've never shared with anyone?",
+"What boundary would you push if you knew there'd be no judgment?",
+"Have you ever thought of someone else while being with someone? What did you feel?",
+"What exact words do you crave to hear when you're on the edge of pleasure?",
+"Is there a part of your body that turns you on but is often overlooked?",
+"What role (dominant, submissive, etc.) have you imagined yourself in but haven't explored?",
+"Have you ever felt desire just from a glance? What made it so powerful?",
+"What's the most unexpectedly arousing thing someone's done for you?",
+"If I gave you full permission, what's the first thing you'd do to me right now?",
+"What's the dirtiest thought you've ever had during a casual moment?",
+"What's something you'd only try behind completely closed doors?",
+"Describe in detail a memory where your desire completely took over.",
+"If I were blindfolded, what would you do to me without saying a word?",
+"What's the one thing that would make you lose control instantly?",
+"If I told you to tease me for five minutes without touching me directly, how would you do it?",
+"Have you ever gotten turned on in a situation you shouldn't have? What triggered it?",
+"What's something you wish someone would do to you while you're begging for more?",
+"How far would you go if we had just one night and no consequences?",
+"Tell me something explicit you wish I'd say to you right now.",
+"What's the wildest place you've fantasized about getting intimate?",
+"What's one secret kink or taboo you've never admitted out loud?",
+"How would you want me to touch you if we couldn't use our hands?",
+"What's the most intense orgasm you've ever had—what made it unforgettable?",
+"If you could have one intimate experience with no limits, what would it look like from first touch to finish?",
+"What intimate question are you afraid someone might ask you… but deep down want to answer?"
+        // ... más preguntas del XXX Expansion Pack
+    ],
+    "Couples Edition": [
+"What was the first thing you noticed about me?",
+
+"If you could describe me in one word, what would it be?",
+
+"How do you think other people perceive me?",
+
+"What's the weirdest thing you think I might do in public?",
+
+"If you had to give me advice about something, what would it be?",
+
+"How do you think I would react if I had to be very honest with you about something?",
+
+"If you only knew me through social media, what would you think of me?",
+
+"What moment with you will remind me the most of you?",
+
+"If you were my mentor for a day, what advice would you give me?",
+
+"What's the first thing you thought when we met?",
+
+"What's one thing about me that surprises you the most when you think about it?",
+
+"If you were describing me to someone without saying my name, what would you say about me?",
+
+"How do you think I would react to an unexpected situation?",
+
+"What part of my personality intrigues you the most?",
+
+"If you were to give me a nickname, what would it be and why?",
+
+"How do you think I can improve as a person?",
+
+"Do you think I'm more of an extrovert or an introvert?",
+
+"If I could change something in my life, what would you change for me?",
+
+"Do you think I have more strengths or weaknesses?",
+
+"What would make me uncomfortable in a conversation with you?",
+
+"When was the last time you felt you really understood me?",
+
+"If you could share something very personal with me, what would it be?",
+
+"What do you feel we have in common?",
+
+"What quality in me would you most like to have?",
+
+"If you could put a song to our bond, what would it be and why?",
+
+"What's your favorite memory of something we've done together?",
+
+"What do you value most about our relationship?",
+
+"What part of your life do you think I could learn from?",
+
+"If you could change something about our interaction, what would you change?",
+
+"How much do you trust me, from 1 to 10, and why?",
+
+"Do you feel heard when we talk? How would you like it to be more so?",
+
+"What kind of emotional support do you consider most important from me?",
+
+"If you knew you could never talk to me again, what would you regret not telling me the most?",
+
+"What's one thing about me that makes you feel most comfortable?",
+
+"What do you think I do that pushes others away without realizing it?",
+
+"What has been the most sincere moment we've had?",
+
+"At what point did you feel our relationship really deepened?",
+
+"What are the things you need to feel truly connected to someone?",
+
+"What's your favorite way to spend time with me?",
+
+"What would you do if you knew there were no consequences for our friendship?",
+
+"What do you think I need to feel completely happy?",
+
+"Is there anything in your life that you feel you never dared to share for fear of judgment?",
+
+"Would you like us to get closer or give each other more space?",
+
+"What insecurities have you had in our relationship that you never mentioned?",
+
+"What bothers you most about yourself in our interactions?",
+
+"If you had to tell me something you've never told me before, what would it be?",
+
+"What would you most like others to know about you but they don't?",
+
+"How do you handle the differences between us when we disagree?",
+
+"If we were to separate, what do you think you would miss most about me?",
+
+"What do you value most in a friendship?",
+
+"How would you like me to support you more in difficult times?",
+
+"What is your biggest fear regarding life and relationships?",
+
+"What do you want to never be lost between us?",
+
+"In what area of your life do you feel you need more help or support?",
+
+"What is the biggest lesson you've learned from the relationships you've had?",
+
+"How would you like our dynamic to change to be more effective?",
+
+"What is the deepest thing you feel you've never told me?",
+
+"If you could ask me for one wish, what would it be?",
+
+"What scares you most about the future, if we were to think about it together?",
+
+"How can we keep our relationship fresh and stimulating?",
+
+"List three things you like about this person and share them out loud.",
+
+"Give the person in front of you a hug for one minute without speaking.",
+
+"Imitate someone at the table and do it for 30 seconds.",
+
+"Pick a song that reminds you of someone here and sing it.",
+
+"Write a message you would have liked to receive, but never did.",
+
+"Tell everyone a silly secret that no one knows about you.",
+
+"Write a message to your closest friend and say something nice.",
+
+"Make a spontaneous joke to make everyone laugh.",
+
+"Imitate an embarrassing moment in your life and act it out.",
+
+"Tell a funny anecdote from your childhood.",
+        // ... más preguntas del Couples Edition
+    ],
+    // ... asegúrate de que todas tus secciones estén aquí con sus preguntas
+};
+
+        let selectedQuestions = [];
+        let usedQuestions = [];
+        let isMouseDown = false;
+        const canvas = document.getElementById("scratch-canvas");
+        const ctx = canvas.getContext("2d");
+        const questionElement = document.getElementById("question");
+        const cardContainer = document.getElementById("card-container");
+
+        // Color piel claro (puedes ajustar los valores RGB)
+        const scratchColor = 'rgb(255, 224, 189)';
+        const scratchRadius = 35; // Radio del área que se "raspa"
+        let currentQuestion = "-1";
+
+        function startGame() {
+            const p1 = document.getElementById("player1").value;
+            const p2 = document.getElementById("player2").value;
+            const categoriasSeleccionadas = document.querySelectorAll('input[name="categoria"]:checked');
+
+            selectedQuestions = [];
+            categoriasSeleccionadas.forEach(checkbox => {
+                const categoria = checkbox.value;
+                if (allQuestions[categoria]) {
+                    selectedQuestions = selectedQuestions.concat(allQuestions[categoria]);
+                }
+            });
+
+            if (p1 && p2 && selectedQuestions.length > 0) {
+                players = [p1, p2];
+                currentPlayerIndex = 0;
+                usedQuestions = [];
+                document.getElementById("start-screen").classList.add("hidden");
+                document.getElementById("game-screen").classList.remove("hidden");
+                showQuestion();
+            } else if (!p1 || !p2) {
+                alert("Por favor ingresa ambos nombres.");
+            } else {
+                alert("Por favor selecciona al menos una categoría de preguntas.");
+            }
+        }
+
+        function showQuestion() {
+            if (selectedQuestions.length === 0 && usedQuestions.length > 0) {
+                currentQuestion = "¡Se acabaron las preguntas de las categorías seleccionadas! ¿Quieren volver a empezar con las mismas categorías?";
+                questionElement.innerText = currentQuestion;
+                questionElement.style.opacity = 1;
+                canvas.style.display = 'none';
+                return;
+            } else if (selectedQuestions.length === 0 && usedQuestions.length === 0) {
+                currentQuestion = "¡No se seleccionaron categorías de preguntas! Por favor, reinicia el juego.";
+                questionElement.innerText = currentQuestion;
+                questionElement.style.opacity = 1;
+                canvas.style.display = 'none';
+                return;
+            }
+
+            const randIndex = Math.floor(Math.random() * selectedQuestions.length);
+            currentQuestion = selectedQuestions.splice(randIndex, 1)[0];
+            usedQuestions.push(currentQuestion);
+
+            document.getElementById("turn-indicator").innerText = `Es el turno de: ${players[currentPlayerIndex]}`;
+            questionElement.innerText = currentQuestion;
+            questionElement.style.opacity = 0; // Inicialmente invisible
+            canvas.style.display = 'block';
+            initializeCanvas();
+        }
+
+        function drawScratchLayer() {
+            ctx.fillStyle = scratchColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalCompositeOperation = 'destination-out'; // Para "borrar" el color
+        }
+
+        function nextTurn() {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            currentQuestionIndex = -1; // Resetear el índice al cambiar de jugador
+            showQuestion();
+        }
+
+        function restartGame() {
+            usedQuestions = []; // Limpiar las preguntas usadas
+            showQuestion(); // Mostrar una nueva pregunta (de las categorías seleccionadas)
+        }
+
+        
+
+        function finalizeGame() {
+            document.getElementById("game-screen").classList.add("hidden");
+            document.getElementById("start-screen").classList.remove("hidden");
+            document.getElementById("player1").value = "";
+            document.getElementById("player2").value = "";
+            const checkboxes = document.querySelectorAll('input[name="categoria"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false; // Deseleccionar todas las categorías al finalizar
+            });
+            selectedQuestions = [];
+            usedQuestions = [];
+        }
+
+        function animateCard() {
+            const cardContainer = document.getElementById("card-container");
+            cardContainer.style.animation = "none";
+            cardContainer.offsetHeight; // Trigger reflow
+            cardContainer.style.animation = "fadeIn 0.5s ease-in-out";
+        }
+
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function scratch(x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, scratchRadius, 0, 2 * Math.PI); // Dibuja un círculo para "raspar"
+            ctx.fill();
+            checkReveal(); // Comprobar si se ha raspado lo suficiente para mostrar la pregunta
+        }
+
+        function checkReveal() {
+            const threshold = 0.3; // Porcentaje del área raspada para mostrar la pregunta
+            const totalPixels = canvas.width * canvas.height;
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let visiblePixels = 0;
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                if (imageData.data[i + 3] === 0) { // Si el alfa es 0, el pixel es transparente
+                    visiblePixels++;
+                }
+            }
+            const visibleRatio = visiblePixels / totalPixels;
+            if (visibleRatio > threshold) {
+                questionElement.style.opacity = 1;
+            }
+        }
+
+        function handleMouseEvent(e) {
+            if (!isMouseDown) return;
+            const pos = getMousePos(canvas, e);
+            scratch(pos.x, pos.y);
+        }
+        function changeQuestion() {
+            if (selectedQuestions.length > 1) { // Asegurarse de que haya más de una pregunta para cambiar
+                let newIndex;
+                do {
+                    newIndex = Math.floor(Math.random() * selectedQuestions.length);
+                } while (newIndex === currentQuestionIndex); // Evitar mostrar la misma pregunta inmediatamente
+
+                currentQuestion = selectedQuestions[newIndex];
+                currentQuestionIndex = newIndex;
+                questionElement.innerText = currentQuestion;
+                questionElement.style.opacity = 0;
+                initializeCanvas();
+            } else {
+                alert("¡No hay suficientes preguntas para cambiar!");
+            }
+        }
+
+        function showQuestion() {
+            if (selectedQuestions.length === 0 && usedQuestions.length > 0) {
+                currentQuestion = "¡Se acabaron las preguntas de las categorías seleccionadas! ¿Quieren volver a empezar con las mismas categorías?";
+                questionElement.innerText = currentQuestion;
+                questionElement.style.opacity = 1;
+                canvas.style.display = 'none';
+                return;
+            } else if (selectedQuestions.length === 0 && usedQuestions.length === 0) {
+                currentQuestion = "¡No se seleccionaron categorías de preguntas! Por favor, reinicia el juego.";
+                questionElement.innerText = currentQuestion;
+                questionElement.style.opacity = 1;
+                canvas.style.display = 'none';
+                return;
+            }
+
+            const randIndex = Math.floor(Math.random() * selectedQuestions.length);
+            currentQuestion = selectedQuestions[randIndex];
+            currentQuestionIndex = randIndex; // Actualizar el índice de la pregunta actual
+            usedQuestions.push(currentQuestion); // Marcamos la pregunta como usada para evitar repeticiones inmediatas (opcional, depende de qué tan seguido quieres que se repitan)
+            selectedQuestions.splice(randIndex, 1); // Eliminamos la pregunta del pool para que no vuelva a salir en la misma ronda
+
+            document.getElementById("turn-indicator").innerText = `Es el turno de: ${players[currentPlayerIndex]}`;
+            questionElement.innerText = currentQuestion;
+            questionElement.style.opacity = 0;
+            canvas.style.display = 'block';
+            initializeCanvas();
+        }
+
+        function handleTouchEvent(e) {
+            if (!isMouseDown) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const pos = getMousePos(canvas, touch);
+            scratch(pos.x, pos.y);
+        }
+
+        // Event listeners para el ratón
+        canvas.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            document.body.classList.add('no-select');
+            const pos = getMousePos(canvas, e);
+            scratch(pos.x, pos.y);
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            document.body.classList.remove('no-select');
+        });
+
+        canvas.addEventListener('mousemove', handleMouseEvent);
+
+        // Event listeners para dispositivos táctiles
+        canvas.addEventListener('touchstart', (e) => {
+            isMouseDown = true;
+            e.preventDefault();
+            document.body.classList.add('no-select');
+            const touch = e.touches[0];
+            const pos = getMousePos(canvas, touch);
+            scratch(pos.x, pos.y);
+        }, false);
+
+        canvas.addEventListener('touchend', () => {
+            isMouseDown = false;
+            document.body.classList.remove('no-select');
+        }, false);
+
+        canvas.addEventListener('touchmove', handleTouchEvent, false);
+
+        // Inicializar el canvas al cargar la pregunta
+        function initializeCanvas() {
+            canvas.width = cardContainer.offsetWidth;
+            canvas.height = cardContainer.offsetHeight;
+            ctx.globalCompositeOperation = 'source-over'; // Restablecer la operación
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpiar el canvas
+            drawScratchLayer();
+            ctx.globalCompositeOperation = 'destination-out'; // Volver a la operación de borrado
+        }
+
+        // Llama a initializeCanvas al mostrar la pregunta y al redimensionar
+        const originalShowQuestion = showQuestion;
+        showQuestion = function() {
+            originalShowQuestion();
+            setTimeout(initializeCanvas, 0); // Asegura que
+            animateCard();
+        };
+
+        const originalRestartGame = restartGame;
+        restartGame = function() {
+            originalRestartGame();
+            setTimeout(initializeCanvas, 0);
+        };
+
+        window.addEventListener('resize', initializeCanvas);
+
+        // Estilo para evitar la selección de texto
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .no-select {
+                -webkit-user-select: none; /* Safari */
+                -moz-user-select: none; /* Firefox */
+                -ms-user-select: none; /* Internet Explorer/Edge */
+                user-select: none; /* Estándar */
+            }
+        `;
+        document.head.appendChild(style);
+
+    </script>
+</body>
+</html>
